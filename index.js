@@ -1,12 +1,13 @@
 const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
+app.use(cors());
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.use(cors());
+
 
 var DB = {
     games: [
@@ -65,13 +66,14 @@ app.post("/games", (req,res) => {
     res.sendStatus(201);
 });
 
-app.delete("games/:id", (req,res) => {
+app.delete("/games/:id", (req,res) => {
     var id = req.params.id;
     if(isNaN(id)){
         res.sendStatus(400);
     } else {
         id = parseInt(id)
         var index = DB.games.findIndex(g => g.id == id);
+        console.log(index);
         if(index == -1){
             res.sendStatus(404);
         }   else {
