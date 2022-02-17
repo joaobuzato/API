@@ -1,12 +1,35 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const jwt = require("jsonwebtoken")
+const JWTSecret = "sdffgffg"
+
 app.use(cors());
 
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+function auth(req,res,next){
+    const authToken = req.headers['authorization'];
+    if(authToken == undefined) {
+        res.status(401);
+        res.json({err: "Token Invalido"});
+    } else {
+        const token = authToken.split(' ')[1]
+        jwt.verify(token, JWTSecret, (err, data) => {
+            if(err) {
+                res.status(401)
+                res.json({err:"Token Inválido"})
+            } else {
+                req.token = token
+                req.loggedUser = {id: data.id, email: data.email}
+                next();
+            }
+        })
+    }
+    
+}
 
 
 var DB = {
@@ -29,11 +52,25 @@ var DB = {
             year: 2010,
             price: 10
         }
+    ],
+    users: [
+        {
+            id: 1,
+            name: "Joao",
+            email:"joaobuzato.dev@gmail.com",
+            password:"nodeEstudo"
+        },
+        {
+            id: 2,
+            name: "Pedro",
+            email:"pedrobuzato.dev@gmail.com",
+            password:"nodeEstudo"
+        }
     ]
 }
 
 
-app.get("/games", (req,res) =>{
+app.get("/games", auth, (req,res) =>{
     res.statusCode = 200;
     res.json(DB.games);
 });
@@ -110,6 +147,38 @@ app.put("/games/:id", (req,res) => {
         
     }
 });
+
+app.post("/auth", (req,res)=>{
+    var {email, password} = req.body;
+
+    
+
+    if(email == undefined){
+        res.status(400);
+        res.json({err: "Email inválido"})
+    } else {
+        var user = DB.users.find(u => u.email == email)
+        if (user == undefined){
+            res.status(404)
+            res.json({err: "O e-mail não existe na base"})
+        } else {
+            if(user.password != password){
+                res.status(401)
+                res.json("Não autorizado.")
+            } else {
+                jwt.sign({id: user.id, email:user.email}, JWTSecret, {expiresIn:'1h'}, (err, token) => {
+                    if(err){
+                        res.status(400);
+                        res.json({err: "Falha interna"})
+                    } else {
+                        res.status(200);
+                        res.json({token: token});
+                    }
+                })
+            }
+        }
+    }
+})
 
 
 app.listen(8080, () => {
