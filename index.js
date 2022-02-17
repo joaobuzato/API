@@ -75,7 +75,7 @@ app.get("/games", auth, (req,res) =>{
     res.json(DB.games);
 });
 
-app.get("/games/:id", (req,res) =>{
+app.get("/games/:id", auth, (req,res) =>{
     var id = req.params.id;
     if(isNaN(id)){
         res.sendStatus(400);
@@ -92,7 +92,7 @@ app.get("/games/:id", (req,res) =>{
     }
 });
 
-app.post("/games", (req,res) => {
+app.post("/games", auth, (req,res) => {
     var { title, price, year } = req.body;
     DB.games.push({
         id: 2345,
@@ -103,7 +103,7 @@ app.post("/games", (req,res) => {
     res.sendStatus(201);
 });
 
-app.delete("/games/:id", (req,res) => {
+app.delete("/games/:id",auth, (req,res) => {
     var id = req.params.id;
     if(isNaN(id)){
         res.sendStatus(400);
@@ -121,7 +121,7 @@ app.delete("/games/:id", (req,res) => {
     }
 });
 
-app.put("/games/:id", (req,res) => {
+app.put("/games/:id",auth, (req,res) => {
     var id = req.params.id;
     if(isNaN(id)){
         res.sendStatus(400);
