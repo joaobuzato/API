@@ -71,12 +71,27 @@ var DB = {
 
 
 app.get("/games", auth, (req,res) =>{
+
+    
     res.statusCode = 200;
     res.json(DB.games);
 });
 
 app.get("/games/:id", auth, (req,res) =>{
     var id = req.params.id;
+    var HATEOAS = [
+        {
+            href: "http://localhost:8080/game/"+id,
+            method: "DELETE",
+            rel: "delete_game"
+        },
+        {
+            href: "http://localhost:8080/game/"+id,
+            method: "PUT",
+            rel: "edit_game"
+        },
+
+    ]
     if(isNaN(id)){
         res.sendStatus(400);
     } else {
@@ -86,7 +101,7 @@ app.get("/games/:id", auth, (req,res) =>{
             res.sendStatus(404);
         }   else {
             res.status = 200;
-            res.json(game);
+            res.json({game, _links: HATEOAS});
         }
         
     }
@@ -105,6 +120,19 @@ app.post("/games", auth, (req,res) => {
 
 app.delete("/games/:id",auth, (req,res) => {
     var id = req.params.id;
+    var HATEOAS = [
+        {
+            href: "http://localhost:8080/game/"+id,
+            method: "GET",
+            rel: "get_game"
+        },
+        {
+            href: "http://localhost:8080/game/"+id,
+            method: "PUT",
+            rel: "edit_game"
+        },
+
+    ]
     if(isNaN(id)){
         res.sendStatus(400);
     } else {
@@ -123,6 +151,19 @@ app.delete("/games/:id",auth, (req,res) => {
 
 app.put("/games/:id",auth, (req,res) => {
     var id = req.params.id;
+    var HATEOAS = [
+        {
+            href: "http://localhost:8080/game/"+id,
+            method: "DELETE",
+            rel: "delete_game"
+        },
+        {
+            href: "http://localhost:8080/game/"+id,
+            method: "GET",
+            rel: "get_game"
+        },
+
+    ]
     if(isNaN(id)){
         res.sendStatus(400);
     } else {
@@ -142,7 +183,7 @@ app.put("/games/:id",auth, (req,res) => {
                 game.price = price;
             }
             res.status = 200;
-            res.json(game);
+            res.json({game, _links:HATEOAS});
         }
         
     }
